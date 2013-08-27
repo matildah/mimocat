@@ -1,0 +1,13 @@
+Mimocat protocol specification
+
+Susan Werner <heinousbutch@gmail.com> 
+
+Mimocat (as in "MIMO netcat") works like netcat (stdin of one netcat goes to
+stdout of the other), except that it sends the data over more than one TCP
+stream. This is primarily useful when you have multiple links between the two
+machines in question and don't want / can't want to mess around with trunking
+the links. 
+
+
+
+
