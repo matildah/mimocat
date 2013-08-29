@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 #include <string.h>
 
 typedef struct cell_hdr {       /* header of a cell */
@@ -79,8 +80,8 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
         return NULL;
     }
     memcpy(&type, source, 1);
-    memcpy(&seq, (source +1), 4);
-    memcpy(&payload_len, (source +5), 4);
+    memcpy(&seq, (source + 1), 4);
+    memcpy(&payload_len, (source + 5), 4);
     
     if (type != DATA_TYPE && type != CMD_TYPE)
     {
@@ -129,6 +130,10 @@ void main ()
     pack_cell(from, payload_m, to);
 
     end = unpack_cell(to->data, to->data_len, check);
+    assert(check->hdr.payload_len == from->payload_len);
+    assert(check->hdr.seq == from->seq);
+    assert(check->hdr.type == from->type);
+
     free(check->payload);
     free(check);
     free(from);
