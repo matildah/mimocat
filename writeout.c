@@ -14,17 +14,26 @@
 typedef struct cell_hdr {       /* header of a cell */
     uint8_t  type;      /* cell type -- command or data?*/
     uint32_t seq;       /* sequence number */
-    uint32_t len;       /* length of the payload, NOT including the header */
+    uint32_t payload_len;       /* length of the payload, NOT including the header */
 } cell_hdr_t;
 
 #define DATA_TYPE   0xFE
 #define CMD_TYPE    0xED
 
 typedef struct packed_cell {    /* packed cell, ready to send */
-    uint32_t len;       /* length of the data */
+    uint32_t data_len;       /* length of the data */
     uint8_t *data;      /* pointer to data */
 } packed_cell_t;
 
+
+typedef struct unpacked_cell {  /* how we store cells after unpacking them but
+                                  prior to reassembling them */
+    cell_hdr_t hdr;             /* a copy of the header */
+    uint8_t  *payload;          /* a pointer to the payload */
+                                /* no need to have a separate variable in this 
+                                   structure for the length of the payload, as
+                                   it's already included in hdr */
+} unpacked_cell_t;
 
 #define HDR_LEN (1+4+4) /* length of the header in bytes*/
 
@@ -36,12 +45,12 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
 {
    uint32_t  seqprime, lenprime;
    seqprime = htonl(source->seq);
-   lenprime = htonl(source->len);
+   lenprime = htonl(source->payload_len);
    memcpy(dest->data, &(source->type), 1);
    memcpy((dest->data) + 1, &seqprime, 4);
    memcpy((dest->data) + 5, &lenprime, 4);
-   memcpy((dest->data) + 9, payload, source->len);
-   dest->len=source->len + HDR_LEN;
+   memcpy((dest->data) + 9, payload, source->payload_len);
+   dest->data_len=source->payload_len + HDR_LEN;
 }
 
 
@@ -59,10 +68,11 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
    */
 
 
-uint8_t *unpack_cell(uint8_t *source, uint32_t size, cell_hdr_t *dest)
+uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
 {
-    uint32_t seq, cell_len;
+    uint32_t seq, payload_len;
     uint8_t type;
+
 
     if(size < HDR_LEN) /* too short to even contain a single cell header */
     {
@@ -70,7 +80,7 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, cell_hdr_t *dest)
     }
     memcpy(&type, source, 1);
     memcpy(&seq, (source +1), 4);
-    memcpy(&cell_len, (source +5), 4);
+    memcpy(&payload_len, (source +5), 4);
     
     if (type != DATA_TYPE && type != CMD_TYPE)
     {
@@ -78,18 +88,18 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, cell_hdr_t *dest)
     }
 
     seq = ntohl(seq);
-    cell_len = ntohl(cell_len);
+    payload_len= ntohl(payload_len);
 
-    if (cell_len + HDR_LEN > size)
+    if (payload_len + HDR_LEN > size)
     {
         return NULL;
     }
 
-    dest->type=type;
-    dest->seq=seq;
-    dest->len=cell_len;
+    dest->hdr.type=type;
+    dest->hdr.seq=seq;
+    dest->hdr.payload_len=payload_len;
     
-    return source + HDR_LEN + cell_len;
+    return source + HDR_LEN + payload_len;
 
 }
 
@@ -106,13 +116,13 @@ void main ()
     uint8_t *payload_m = malloc(7);
     memcpy(payload_m,&payload,7);
     printf("%s",payload_m);
-    from->len=7;
+    from->payload_len=7;
     from->seq=0xfeedface;
     from->type=0xFE;
-    to->data=malloc(HDR_LEN + from->len);
+    to->data=malloc(HDR_LEN + from->payload_len);
     pack_cell(from, payload_m, to);
 
-    end = unpack_cell(to->data, to->len, check);
+    end = unpack_cell(to->data, to->payload_len, check);
     free(check);
 
 
