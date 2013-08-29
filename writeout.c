@@ -14,8 +14,11 @@
 typedef struct cell_hdr {       /* header of a cell */
     uint8_t  type;      /* cell type -- command or data?*/
     uint32_t seq;       /* sequence number */
-    uint32_t len;       /* length of the payload */
+    uint32_t len;       /* length of the payload, NOT including the header */
 } cell_hdr_t;
+
+#define DATA_TYPE   0xFE
+#define CMD_TYPE    0xED
 
 typedef struct packed_cell {    /* packed cell, ready to send */
     uint32_t len;       /* length of the data */
@@ -42,19 +45,77 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
 }
 
 
+
+/* unpack_cell -- takes a blob of data, size bytes long, pointed to by source
+   and extracts and unpacks the cell header (putting it in the dest pointer,
+   as well as returning a pointer to the end of the cell+payload that was
+   processed. 
+
+   the chunk of data pointed to by source can contain stuff after the end of
+   the cell but *must* start with a cell_hdr.
+
+   if it returns NULL, this means that no cells were found.
+
+   */
+
+
+uint8_t *unpack_cell(uint8_t *source, uint32_t size, cell_hdr_t *dest)
+{
+    uint32_t seq, cell_len;
+    uint8_t type;
+
+    if(size < HDR_LEN) /* too short to even contain a single cell header */
+    {
+        return NULL;
+    }
+    memcpy(&type, source, 1);
+    memcpy(&seq, (source +1), 4);
+    memcpy(&cell_len, (source +5), 4);
+    
+    if (type != DATA_TYPE && type != CMD_TYPE)
+    {
+        return NULL;
+    }
+
+    seq = ntohl(seq);
+    cell_len = ntohl(cell_len);
+
+    if (cell_len + HDR_LEN > size)
+    {
+        return NULL;
+    }
+
+    dest->type=type;
+    dest->seq=seq;
+    dest->len=cell_len;
+    
+    return source + HDR_LEN + cell_len;
+
+}
+
+
+
+
 void main ()
 {
     packed_cell_t *to= malloc(sizeof(packed_cell_t));
     cell_hdr_t *from = malloc(sizeof(cell_hdr_t));
+    uint8_t *end;
+    cell_hdr_t *check= malloc(sizeof(cell_hdr_t));
     uint8_t payload [] = {0x41,0x41,0x41,0x41,0x41,0X41,0x00};
     uint8_t *payload_m = malloc(7);
     memcpy(payload_m,&payload,7);
     printf("%s",payload_m);
     from->len=7;
     from->seq=0xfeedface;
-    from->type=69;
+    from->type=0xFE;
     to->data=malloc(HDR_LEN + from->len);
     pack_cell(from, payload_m, to);
+
+    end = unpack_cell(to->data, to->len, check);
+    free(check);
+
+
     free(from);
     free(to->data);
     free(to);
