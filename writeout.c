@@ -87,14 +87,17 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
         return NULL;
     }
 
-    seq = ntohl(seq);
+    seq = ntohl(seq);                 /* byte order conversion */
     payload_len= ntohl(payload_len);
 
-    if (payload_len > size - HDR_LEN)
+    if (payload_len > size - HDR_LEN) /* we know size >= HDR_LEN so we
+                                         won't have an integer overflow
+                                         here */
     {
-        return NULL;
+        return NULL;                  /* packet's header will have us reading
+                                         past the buffer's end, can't let that
+                                         happen */
     }
-
     dest->hdr.type=type;
     dest->hdr.seq=seq;
     dest->hdr.payload_len=payload_len;
