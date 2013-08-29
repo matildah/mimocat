@@ -114,7 +114,7 @@ void main ()
     packed_cell_t *to= malloc(sizeof(packed_cell_t));
     uint8_t *end;
     unpacked_cell_t *check= malloc(sizeof(unpacked_cell_t));
-    uint8_t payload [] = {0x41,0x41,0x41,0x41,0x41,0X41,0x00};
+    uint8_t payload [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x00};
     uint8_t *payload_m = malloc(7);
     memcpy(payload_m,&payload,7);
     printf("%s",payload_m);
