@@ -98,7 +98,9 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
     dest->hdr.type=type;
     dest->hdr.seq=seq;
     dest->hdr.payload_len=payload_len;
-    
+    dest->payload=malloc(payload_len);
+    memcpy(dest->payload, (source+9), payload_len);
+
     return source + HDR_LEN + payload_len;
 
 }
@@ -108,10 +110,10 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
 
 void main ()
 {
-    packed_cell_t *to= malloc(sizeof(packed_cell_t));
     cell_hdr_t *from = malloc(sizeof(cell_hdr_t));
+    packed_cell_t *to= malloc(sizeof(packed_cell_t));
     uint8_t *end;
-    cell_hdr_t *check= malloc(sizeof(cell_hdr_t));
+    unpacked_cell_t *check= malloc(sizeof(unpacked_cell_t));
     uint8_t payload [] = {0x41,0x41,0x41,0x41,0x41,0X41,0x00};
     uint8_t *payload_m = malloc(7);
     memcpy(payload_m,&payload,7);
@@ -120,12 +122,12 @@ void main ()
     from->seq=0xfeedface;
     from->type=0xFE;
     to->data=malloc(HDR_LEN + from->payload_len);
+
     pack_cell(from, payload_m, to);
 
-    end = unpack_cell(to->data, to->payload_len, check);
+    end = unpack_cell(to->data, to->data_len, check);
+    free(check->payload);
     free(check);
-
-
     free(from);
     free(to->data);
     free(to);
