@@ -90,7 +90,7 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
     seq = ntohl(seq);
     payload_len= ntohl(payload_len);
 
-    if (payload_len + HDR_LEN > size)
+    if (payload_len > size - HDR_LEN)
     {
         return NULL;
     }
