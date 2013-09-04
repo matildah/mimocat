@@ -51,7 +51,7 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
    memcpy(dest->data, &(source->type), 1);
    memcpy((dest->data) + 1, &seqprime, 4);
    memcpy((dest->data) + 5, &lenprime, 4);
-   memcpy((dest->data) + 9, payload, source->payload_len);
+   memcpy((dest->data) + HDR_LEN, payload, source->payload_len);
    dest->data_len=source->payload_len + HDR_LEN;
 }
 
@@ -113,9 +113,15 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
        unpack_cell */
 
 /*  dest->payload=malloc(payload_len);               
-    memcpy(dest->payload, (source+9), payload_len);
+    memcpy(dest->payload, (source+HDR_LEN), payload_len);
 */
-    return source + HDR_LEN + payload_len;
+    return source + HDR_LEN + payload_len; /* this is a pointer to the last 
+                                              byte of the payload, *inside the
+                                              original buffer we got given */
+
+    /* it is up to our caller to copy the data from (source + HDR_LEN) to 
+       (source + HDR_LEN + payload_len) (the return value) if they, for some 
+       odd reason, want the payload somewhere */
 
 }
 
