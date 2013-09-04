@@ -48,8 +48,7 @@ typedef struct reassembly_state {
 typedef struct reordering_state{
     unpacked_cell_t *head;            /* the head of the linked list where we 
                                        store not-yet-processed cells */
-
-} reodring_state_t;
+} reordering_state_t;
 
 
 
