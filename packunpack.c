@@ -61,11 +61,15 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
    and extracts and unpacks the cell header (putting it in the dest pointer,
    as well as returning a pointer to the end of the cell+payload that was
    processed. 
+   
+   the caller of this function needs to handle the whole "copy the payload to 
+   an appropriate buffer" thing -- unpack_cell does not do anything wth the 
+   payload besides return a pointer to its last byte.
 
    the chunk of data pointed to by source can contain stuff after the end of
    the cell but *must* start with a cell_hdr.
 
-   if it returns NULL, this means that no cells were found.
+   if it returns NULL, this means that no valid cells were found.
 
    */
 
