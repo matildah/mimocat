@@ -18,6 +18,8 @@ typedef struct cell_hdr {       /* header of a cell */
     uint32_t payload_len;       /* length of the payload, NOT including the header */
 } cell_hdr_t;
 
+#define HDR_LEN (1+4+4) /* length of the header in bytes*/
+
 #define DATA_TYPE   0xFE
 #define CMD_TYPE    0xED
 
@@ -36,7 +38,6 @@ typedef struct unpacked_cell {  /* how we store cells after unpacking them but
                                    it's already included in hdr */
 } unpacked_cell_t;
 
-#define HDR_LEN (1+4+4) /* length of the header in bytes*/
 
 
 /* pack_cell -- take a cell_hdr struct and some data and pack it into a blob
@@ -89,9 +90,9 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
     }
 
     seq = ntohl(seq);                 /* byte order conversion */
-    payload_len= ntohl(payload_len);
+    payload_len = ntohl(payload_len);
 
-    if (payload_len > size - HDR_LEN) /* we know size >= HDR_LEN so we
+    if (payload_len > (size - HDR_LEN)) /* we know size >= HDR_LEN so we
                                          won't have an integer overflow
                                          here */
     {
@@ -102,9 +103,14 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
     dest->hdr.type=type;
     dest->hdr.seq=seq;
     dest->hdr.payload_len=payload_len;
-    dest->payload=malloc(payload_len);
-    memcpy(dest->payload, (source+9), payload_len);
 
+    /* i commented the step where we allocate a buffer for the payload and 
+       copy the payload to that buffer, that is better done by whoever calls
+       unpack_cell */
+
+/*  dest->payload=malloc(payload_len);               
+    memcpy(dest->payload, (source+9), payload_len);
+*/
     return source + HDR_LEN + payload_len;
 
 }
