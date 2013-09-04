@@ -8,28 +8,48 @@
 #include "mimocat.h"
 
 
-/* the way this code works is that it keeps two structures around -- one with 
-   information on what's already been reassembled and one with information on
-   things which haven't been reassembled yet
-   
-   the former structure is called reassembly_state, and the latter structure is
-   just simply the unpacked_cell structure that unpack_cell() writes to.
 
-   unpack_cell() doesn't handle anything to do with either the payload nor the
-   unpacked_cell->next pointer, it's up to us to do so here.
- 
- 
+/* there are two different steps in taking data from more than one network 
+   stream, reassembling cells, and reordering them into one stdout stream.
+
+   1) for each input stream, we convert non-delimited data into cells, and 
+   unpack those cells, and add them to the linked list.
+
+   2) look at the linked list and reassemble cells (in order!) into one output 
+   data stream.
+
+
+   step one needs to have one state per each network stream, while step two
+   works on one linked list (for all the incoming network streams).
+
  */
 
 
-
-
-
-
+/* this is the state for step one. there is one instance of this structure for
+   each input stream */
 
 typedef struct reassembly_state {
-    
+
+    uint8_t *lastbyte;              /* the last byte of the last cell we fully 
+                                       processed. this is a pointer within the 
+                                       buffer called "incomplete" */
+
+    uint8_t *incomplete;            /* a buffer where we keep data that does 
+                                       not compose a full cell */
+    size_t incomplete_length;       /* current size of that buffer */
+
 } reassembly_state_t;
+
+
+
+/* this is the state for step 2. there is one instance of this structure per 
+   output stream (so just 1 instance assuming we're just writing to stdout) */
+
+typedef struct reordering_state{
+    unpacked_cell_t *head;            /* the head of the linked list where we 
+                                       store not-yet-processed cells */
+
+} reodring_state_t;
 
 
 
