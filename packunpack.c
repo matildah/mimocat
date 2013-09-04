@@ -22,7 +22,7 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
    memcpy((dest->data),           &(source->type), 1);
    memcpy((dest->data) + 1,       &seqprime,       4);
    memcpy((dest->data) + 5,       &lenprime,       4);
-   memcpy((dest->data) + HDR_LEN, payload,          source->payload_len);
+   memcpy((dest->data) + HDR_LEN, payload,         source->payload_len);
 
    /* ...and we put how much data we wrote in the appropriate place */
    dest->data_len = source->payload_len + HDR_LEN;
