@@ -19,8 +19,8 @@
    data stream.
 
 
-   step one needs to have one state per each network stream, while step two
-   works on one linked list (for all the incoming network streams).
+   step one needs to have one instance of state per each network stream, while 
+   step two works on one linked list (for all the incoming network streams).
 
  */
 
@@ -37,6 +37,7 @@ typedef struct reassembly_state {
     uint8_t *incomplete;            /* a buffer where we keep data that does 
                                        not compose a full cell */
     size_t incomplete_length;       /* current size of that buffer */
+
 
 } reassembly_state_t;
 
