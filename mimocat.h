@@ -37,6 +37,7 @@ typedef struct unpacked_cell {  /* how we store cells after unpacking them but
                                 /* no need to have a separate variable in this 
                                    structure for the length of the payload, as
                                    it's already included in hdr */
+    struct unpacked_cell *next;      /* this is gonna be a linked list soon */
 } unpacked_cell_t;
 
 
