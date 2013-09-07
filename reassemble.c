@@ -48,7 +48,11 @@ typedef struct reassembly_state {
 
 typedef struct reordering_state{
     unpacked_cell_t *head;            /* the head of the linked list where we 
-                                       store not-yet-processed cells */
+                                         store not-yet-processed cells */
+    uint32_t last;                    /* the sequence number of the last cell 
+                                         we processed (aka, the sequence number
+                                         of the last cell that got removed from
+                                         the linked list */
 } reordering_state_t;
 
 
