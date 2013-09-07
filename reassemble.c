@@ -184,8 +184,11 @@ int main() {
     push_data(dest->data, dest->data_len, state);
     unpacked_cell_t *foobar = pop_cell(state);    
 
-
-
+    free(foobar->payload);
+    free(foobar);
+    free(hdr);
+    free(dest->data);
+    free(dest);
     free(state->incomplete);
     free(state);
     return 0;
