@@ -125,8 +125,18 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 }
 
 
+
+/* pop_cell takes in a reassembly_state structure and looks into the 
+   incomplete buffer for completed cells. It returns an unpacked_cell structure
+   as well as advancing the readpos pointer appropriately 
+   */
+
 unpacked_cell_t * pop_cell(reassembly_state_t *state) 
 {
+    unpacked_cell_t *out;
+    uint8_t *endofcell;
+    out = malloc(sizeof(unpacked_cell_t));
+    assert (out != NULL);
     assert (state->writepos != NULL);
     assert (state->readpos  != NULL);
 
@@ -142,17 +152,28 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
     /* where we start reading should be before where we'll end reading 
      otherwise horrible things may happen */
     assert(state->writepos > state->readpos);
+    
+    endofcell = unpack_cell(state->readpos, state->writepos - state->readpos, out);
+
+    if(endofcell == NULL)
+    {
+        return NULL;
+    }
+    out->payload = malloc(out->hdr.payload_len);
+    memcpy(out->payload, (state->readpos + HDR_LEN), out->hdr.payload_len);
+
+    state->readpos = endofcell + 1;
 
 
-   
 }
 
 
 int main() {
-    uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x42};
+    uint8_t data [] = {0xFE,0x41,0x41,0x41,0x41,0x41,0x42};
     reassembly_state_t * state = initialize_reass();
     push_data(data, 7, state); 
     push_data(data, 7, state); 
+    pop_cell(state);    
     free(state->incomplete);
     free(state);
     return 0;
