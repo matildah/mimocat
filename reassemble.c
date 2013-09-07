@@ -41,8 +41,12 @@
 
    readpos points to the initial byte of valid cell data. readpos 
    is only to be modified by code that takes valid cells out of the buffer.
-   */
 
+
+   if we ever have writepos == readpos, this means there are no data in the 
+   buffer and that we are free to set both writepos and readpos to point at
+   the beginning of the buffer (to prevent it from growing indefinitely big)
+*/
 
 typedef struct reassembly_state {
     uint8_t *writepos;             
@@ -64,6 +68,8 @@ typedef struct reordering_state{
                                          of the last cell that got removed from
                                          the linked list */
 } reordering_state_t;
+
+
 
 
 
@@ -94,12 +100,16 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
        
        size_t grow  = len; /* we can grow it by how much we want, but it needs
                                to be at least big enough to hold the new data */
+
+
+       /* we need to convert the pointers to things within the buffers to 
+          offsets because realloc might change where the buffer begins */
        size_t offset_w = state->writepos - state->incomplete;
        size_t offset_r = state->readpos - state->incomplete;
           
 
        uint8_t *newbuf = realloc(state->incomplete, state->incomplete_len + grow );
-       assert (newbuf!= NULL);
+       assert (newbuf != NULL);
 
        state->incomplete = newbuf; /* ok, realloc worked */
 
