@@ -127,6 +127,9 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 
 unpacked_cell_t * pop_cell(reassembly_state_t *state) 
 {
+    assert (state->writepos != NULL);
+    assert (state->readpos  != NULL);
+
     if(state->writepos == state->readpos)
     {
         /* no bytes for us to read here, might as well reset these pointers
@@ -136,7 +139,8 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
         return NULL;
     }
 
-    /* where we start reading should be before where we'll end reading */
+    /* where we start reading should be before where we'll end reading 
+     otherwise horrible things may happen */
     assert(state->writepos > state->readpos);
 
 
