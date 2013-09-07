@@ -78,18 +78,30 @@ reassembly_state_t * initialize_reass()
    the end of the incomplete buffer*/
 void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 {
-    size_t bytes_left; /* how much space is left in the incomplete buffer */
+    size_t bytes_left; /* how many bytes are available inside the buffer */
     bytes_left = state->incomplete_len - (state->curpos - state->incomplete);
     
     if(bytes_left < len)
-    {
+    { /* ok, we need to grow our buffer to accomodate the incoming data */
+       
+       size_t grow  = len; /* we can grow it by how much we want, but it needs
+                               to be at least big enough to hold the new data */
        size_t offset = state->curpos - state->incomplete;
-       uint8_t *incompleteprime = realloc(state->incomplete, 
-               state->incomplete_len + len);
-       assert (incompleteprime != NULL);
-       state->incomplete = incompleteprime;
-       state->incomplete_len = state->incomplete_len + len;
-       state->curpos = state->incomplete + offset;
+       /* the above line is 'cuz the realloc'd buffer might not start at the 
+          same place as before it got realloc'd */
+          
+
+       uint8_t *newbuf = realloc(state->incomplete, state->incomplete_len + grow );
+       assert (newbuf!= NULL);
+
+       state->incomplete = newbuf; /* ok, realloc worked */
+
+       state->incomplete_len += grow; /* keep track of the current buffer size */
+
+       state->curpos = state->incomplete + offset; /* and set up the curpos 
+                                                      pointer to the same byte 
+                                                      offset within the buffer 
+                                                      where it initially was */
     }
     
     memcpy(state->curpos, data, len);
@@ -99,7 +111,7 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 
 
 int main() {
-    uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x00};
+    uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x42};
     reassembly_state_t * state = initialize_reass();
     push_data(data, 7, state); 
     push_data(data, 7, state); 
