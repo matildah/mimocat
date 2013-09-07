@@ -41,4 +41,4 @@ typedef struct unpacked_cell {  /* how we store cells after unpacking them but
 } unpacked_cell_t;
 
 
-
+uint8_t *unpack_cell(uint8_t *, uint32_t , unpacked_cell_t *);
