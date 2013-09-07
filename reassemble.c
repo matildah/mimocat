@@ -25,7 +25,7 @@
  */
 
 
-#define INITIALBUFFER (1024*8) /* initial length of the reassembly buffer. 
+#define INITIALBUFFER (1) /* initial length of the reassembly buffer. 
                                 this is totally arbitrary */
 
 /* this is the state for step one. there is one instance of this structure for
@@ -33,7 +33,7 @@
 
 typedef struct reassembly_state {
 
-    uint8_t *start;                 /* the byte *after* the last byte of the last 
+    uint8_t *curpos;             /* the byte *after* the last byte of the last 
                                     cell we fully processed. this is a pointer within the 
                                     buffer called "incomplete" */
 
@@ -67,16 +67,46 @@ reassembly_state_t * initialize_reass()
 
     reassembly_state_t * state=malloc(sizeof(reassembly_state_t));
     assert(state != NULL);
-    state->incomplete = malloc(INITIALBUFFER);
+    state->incomplete = malloc(sizeof(uint8_t) * INITIALBUFFER);
     assert(state->incomplete != NULL);
-    state->start= state->incomplete;
+    state->curpos = state->incomplete;
     state->incomplete_len = INITIALBUFFER;
-
+    return state;
 }
 
 /* takes a blob of data (with no specific requirements on it) and adds it to
    the end of the incomplete buffer*/
-int push_data(uint8_t *data, size_t len, reassembly_state_t *state)
+void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 {
+    size_t bytes_left; /* how much space is left in the incomplete buffer */
+    bytes_left = state->incomplete_len - (state->curpos - state->incomplete);
+    
+    if(bytes_left < len)
+    {
+       size_t offset = state->curpos - state->incomplete;
+       uint8_t *incompleteprime = realloc(state->incomplete, 
+               state->incomplete_len + len);
+       assert (incompleteprime != NULL);
+       state->incomplete = incompleteprime;
+       state->incomplete_len = state->incomplete_len + len;
+       state->curpos = state->incomplete + offset;
+    }
+    
+    memcpy(state->curpos, data, len);
+    state->curpos += len;
+
+}
+
+
+int main() {
+    uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x00};
+    reassembly_state_t * state = initialize_reass();
+    push_data(data, 7, state); 
+    push_data(data, 7, state); 
+    free(state->incomplete);
+    free(state);
+    return 0;
+
+    
 }
 
