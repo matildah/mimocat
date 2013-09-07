@@ -169,11 +169,23 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
 
 
 int main() {
-    uint8_t data [] = {0xFE,0x41,0x41,0x41,0x41,0x41,0x42};
-    reassembly_state_t * state = initialize_reass();
-    push_data(data, 7, state); 
-    push_data(data, 7, state); 
-    pop_cell(state);    
+    reassembly_state_t *state = initialize_reass();
+    cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
+    packed_cell_t *dest = malloc(sizeof(packed_cell_t));
+    dest->data = malloc(7 + HDR_LEN);
+    uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x42};
+    
+    
+    hdr->seq=0xabadbeef;
+    hdr->payload_len=7;
+    hdr->type=DATA_TYPE;
+
+    pack_cell(hdr, data, dest);
+    push_data(dest->data, dest->data_len, state);
+    unpacked_cell_t *foobar = pop_cell(state);    
+
+
+
     free(state->incomplete);
     free(state);
     return 0;
