@@ -25,23 +25,30 @@
  */
 
 
-#define INITIALBUFFER (1) /* initial length of the reassembly buffer. 
+#define INITIALBUFFER (1024) /* initial length of the reassembly buffer. 
                                 this is totally arbitrary */
 
 /* this is the state for step one. there is one instance of this structure for
    each input stream */
 
+/* this structure is used to manage a buffer called "incomplete". We maintain
+   two pointers within this buffer -- one called writepos, one called readpos.
+
+   writepos points to the byte AFTER the last byte of the last chunk of data 
+   we wrote to the buffer. writepos is only to be modified by code that adds
+   data to the buffer. adding x bytes to the buffer means writepos will be 
+   incremented by x.
+
+   readpos points to the initial byte of valid cell data. readpos 
+   is only to be modified by code that takes valid cells out of the buffer.
+   */
+
+
 typedef struct reassembly_state {
-
-    uint8_t *curpos;             /* the byte *after* the last byte of the last 
-                                    cell we fully processed. this is a pointer within the 
-                                    buffer called "incomplete" */
-
-    uint8_t *incomplete;            /* a buffer where we keep data that does 
-                                       not compose a full cell */
-    size_t incomplete_len;          /* current size of that buffer */
-
-
+    uint8_t *writepos;             
+    uint8_t *readpos;              
+    uint8_t *incomplete;            
+    size_t incomplete_len;          
 } reassembly_state_t;
 
 
@@ -69,7 +76,8 @@ reassembly_state_t * initialize_reass()
     assert(state != NULL);
     state->incomplete = malloc(sizeof(uint8_t) * INITIALBUFFER);
     assert(state->incomplete != NULL);
-    state->curpos = state->incomplete;
+    state->writepos = state->incomplete;
+    state->readpos = state->incomplete;
     state->incomplete_len = INITIALBUFFER;
     return state;
 }
@@ -79,16 +87,15 @@ reassembly_state_t * initialize_reass()
 void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 {
     size_t bytes_left; /* how many bytes are available inside the buffer */
-    bytes_left = state->incomplete_len - (state->curpos - state->incomplete);
+    bytes_left = state->incomplete_len - (state->writepos - state->incomplete);
     
     if(bytes_left < len)
     { /* ok, we need to grow our buffer to accomodate the incoming data */
        
        size_t grow  = len; /* we can grow it by how much we want, but it needs
                                to be at least big enough to hold the new data */
-       size_t offset = state->curpos - state->incomplete;
-       /* the above line is 'cuz the realloc'd buffer might not start at the 
-          same place as before it got realloc'd */
+       size_t offset_w = state->writepos - state->incomplete;
+       size_t offset_r = state->readpos - state->incomplete;
           
 
        uint8_t *newbuf = realloc(state->incomplete, state->incomplete_len + grow );
@@ -98,14 +105,12 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 
        state->incomplete_len += grow; /* keep track of the current buffer size */
 
-       state->curpos = state->incomplete + offset; /* and set up the curpos 
-                                                      pointer to the same byte 
-                                                      offset within the buffer 
-                                                      where it initially was */
+       state->writepos = state->incomplete + offset_w; 
+       state->readpos = state->incomplete + offset_r; 
     }
     
-    memcpy(state->curpos, data, len);
-    state->curpos += len;
+    memcpy(state->writepos, data, len);
+    state->writepos += len;
 
 }
 
