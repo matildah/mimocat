@@ -99,10 +99,11 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
 }
 
 
-
+/*
 
 void main ()
 {
+
     cell_hdr_t *from = malloc(sizeof(cell_hdr_t));
     packed_cell_t *to= malloc(sizeof(packed_cell_t));
     uint8_t *end;
@@ -132,4 +133,4 @@ void main ()
 }
 
 
-
+*/
