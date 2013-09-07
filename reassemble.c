@@ -163,7 +163,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
     memcpy(out->payload, (state->readpos + HDR_LEN), out->hdr.payload_len);
 
     state->readpos = endofcell + 1;
-
+    return out;
 
 }
 
