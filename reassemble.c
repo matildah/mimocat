@@ -98,7 +98,7 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
     if(bytes_left < len)
     { /* ok, we need to grow our buffer to accomodate the incoming data */
        
-       size_t grow  = len; /* we can grow it by how much we want, but it needs
+       size_t grow = len; /* we can grow it by how much we want, but it needs
                                to be at least big enough to hold the new data */
 
 
@@ -122,6 +122,25 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
     memcpy(state->writepos, data, len);
     state->writepos += len;
 
+}
+
+
+unpacked_cell_t * pop_cell(reassembly_state_t *state) 
+{
+    if(state->writepos == state->readpos)
+    {
+        /* no bytes for us to read here, might as well reset these pointers
+           back to the start of the buffer */
+        state->writepos = state->incomplete;
+        state->readpos = state->incomplete;
+        return NULL;
+    }
+
+    /* where we start reading should be before where we'll end reading */
+    assert(state->writepos > state->readpos);
+
+
+   
 }
 
 
