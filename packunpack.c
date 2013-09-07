@@ -88,9 +88,10 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
 /*  dest->payload=malloc(payload_len);               
     memcpy(dest->payload, (source+HDR_LEN), payload_len);
 */
-    return source + HDR_LEN + payload_len; /* this is a pointer to the last 
-                                              byte of the payload, *inside the
-                                              original buffer we got given */
+    return source + HDR_LEN + (payload_len - 1); /* this is a pointer to the 
+                                                  last byte of the payload, 
+                                                  inside the original buffer 
+                                                  we got given */
 
     /* it is up to our caller to copy the data from (source + HDR_LEN) to 
        (source + HDR_LEN + payload_len) (the return value) if they, for some 
