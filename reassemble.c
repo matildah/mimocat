@@ -25,18 +25,21 @@
  */
 
 
+#define INITIALBUFFER (1024*8) /* initial length of the reassembly buffer. 
+                                this is totally arbitrary */
+
 /* this is the state for step one. there is one instance of this structure for
    each input stream */
 
 typedef struct reassembly_state {
 
-    uint8_t *lastbyte;              /* the last byte of the last cell we fully 
-                                       processed. this is a pointer within the 
-                                       buffer called "incomplete" */
+    uint8_t *start;                 /* the byte *after* the last byte of the last 
+                                    cell we fully processed. this is a pointer within the 
+                                    buffer called "incomplete" */
 
     uint8_t *incomplete;            /* a buffer where we keep data that does 
                                        not compose a full cell */
-    size_t incomplete_length;       /* current size of that buffer */
+    size_t incomplete_len;          /* current size of that buffer */
 
 
 } reassembly_state_t;
@@ -57,4 +60,23 @@ typedef struct reordering_state{
 
 
 
+
+
+reassembly_state_t * initialize_reass()
+{
+
+    reassembly_state_t * state=malloc(sizeof(reassembly_state_t));
+    assert(state != NULL);
+    state->incomplete = malloc(INITIALBUFFER);
+    assert(state->incomplete != NULL);
+    state->start= state->incomplete;
+    state->incomplete_len = INITIALBUFFER;
+
+}
+
+/* takes a blob of data (with no specific requirements on it) and adds it to
+   the end of the incomplete buffer*/
+int push_data(uint8_t *data, size_t len, reassembly_state_t *state)
+{
+}
 
