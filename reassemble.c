@@ -146,6 +146,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
            back to the start of the buffer */
         state->writepos = state->incomplete;
         state->readpos = state->incomplete;
+        free(out);
         return NULL;
     }
 
@@ -157,6 +158,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
 
     if(endofcell == NULL)
     {
+        free(out);
         return NULL;
     }
     out->payload = malloc(out->hdr.payload_len);
@@ -170,6 +172,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
 
 int main() {
     reassembly_state_t *state = initialize_reass();
+    unpacked_cell_t *foobar, *b;
     cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
     packed_cell_t *dest = malloc(sizeof(packed_cell_t));
     dest->data = malloc(7 + HDR_LEN);
@@ -182,7 +185,8 @@ int main() {
 
     pack_cell(hdr, data, dest);
     push_data(dest->data, dest->data_len, state);
-    unpacked_cell_t *foobar = pop_cell(state);    
+    foobar = pop_cell(state);    
+    b = pop_cell(state);    
 
     free(foobar->payload);
     free(foobar);
