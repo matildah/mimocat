@@ -162,6 +162,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
         return NULL;
     }
     out->payload = malloc(out->hdr.payload_len);
+    assert (out->payload != NULL);
     memcpy(out->payload, (state->readpos + HDR_LEN), out->hdr.payload_len);
 
     state->readpos = endofcell + 1;
@@ -178,6 +179,11 @@ reordering_state_t * initialize_reorder()
     state->head=NULL;
     return state;
 }
+
+void reorder_add(unpacked_cell_t *cell, reordering_state_t *state)
+{
+}
+
 
 
 int main() {
