@@ -49,10 +49,10 @@
 */
 
 typedef struct reassembly_state {
-    uint8_t *writepos;             
-    uint8_t *readpos;              
-    uint8_t *incomplete;            
-    size_t incomplete_len;          
+    uint8_t *writepos;     /* pointer within incomplete */
+    uint8_t *readpos;      /* pointer within incomplete */            
+    uint8_t *incomplete;   /* the reassembly buffer */
+    size_t incomplete_len; /* and its length */
 } reassembly_state_t;
 
 
