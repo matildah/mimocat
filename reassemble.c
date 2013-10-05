@@ -176,13 +176,30 @@ reordering_state_t * initialize_reorder()
     reordering_state_t *state = malloc(sizeof(reordering_state_t));
     assert(state != NULL);
     state->last_seq = 0;
-    state->head=NULL;
+    state->head = NULL;
     return state;
 }
 
-void reorder_add(unpacked_cell_t *cell, reordering_state_t *state)
+void reorder_add(unpacked_cell_t *newcell, reordering_state_t *state)
 {
+    unpacked_cell_t *tmp;
+    assert(newcell != NULL);
+    assert(state != NULL);
+    if (state->head != NULL)
+    {
+        state->head = newcell;
+        newcell->next=NULL;
+        return;
+    }
 
+    
+    for (tmp = state->head; tmp->next != NULL; tmp=tmp->next)
+    {
+    }
+    
+    assert(tmp != NULL);
+    tmp->next = newcell;
+    newcell->next=NULL;
 }
 
 
