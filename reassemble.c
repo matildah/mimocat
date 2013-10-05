@@ -203,6 +203,9 @@ void reorder_add(unpacked_cell_t *newcell, reordering_state_t *state)
 }
 
 
+size_t reorder_pop(uint8_t *data, reordering_state_t *state)
+{
+}
 
 int main() {
     reassembly_state_t *state = initialize_reass();
