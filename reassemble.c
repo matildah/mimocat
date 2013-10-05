@@ -209,6 +209,7 @@ int main() {
     unpacked_cell_t *foobar, *b;
     cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
     packed_cell_t *dest = malloc(sizeof(packed_cell_t));
+
     dest->data = malloc(7 + HDR_LEN);
     uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x42};
     
@@ -228,6 +229,7 @@ int main() {
     free(dest->data);
     free(dest);
     free(state->incomplete);
+    free(b);
     free(state);
     return 0;
 
