@@ -1,5 +1,0 @@
-If we're working with N-bit long sequence numbers, they wrap at 2^N, wrapped 
-sequence numbers become an issue when packets with sequence number n and 
-sequence number n+2^N are both in transit. 
-
-
