@@ -46,6 +46,13 @@
    if we ever have writepos == readpos, this means there are no data in the 
    buffer and that we are free to set both writepos and readpos to point at
    the beginning of the buffer (to prevent it from growing indefinitely big)
+
+       /- incomplete
+       +0    +1    +2    +3    +4    +5   +6     +7
+    [-----|-----|XXXXX|XXXXX|XXXXX|-----|-----|-----]
+                   ^                 ^
+                   \ readpos         \ writepos
+
 */
 
 typedef struct reassembly_state {
