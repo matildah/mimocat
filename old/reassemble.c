@@ -84,7 +84,6 @@ typedef struct reordering_state{
 
 reassembly_state_t * initialize_reass()
 {
-
     reassembly_state_t * state=malloc(sizeof(reassembly_state_t));
     assert(state != NULL);
     state->incomplete = malloc(sizeof(uint8_t) * INITIALBUFFER);
@@ -108,11 +107,13 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
        size_t grow = len; /* we can grow it by how much we want, but it needs
                                to be at least big enough to hold the new data */
 
+       size_t offset_w; 
+       size_t offset_r;
 
        /* we need to convert the pointers to things within the buffers to 
           offsets because realloc might change where the buffer begins */
-       size_t offset_w = state->writepos - state->incomplete;
-       size_t offset_r = state->readpos - state->incomplete;
+       offset_w = state->writepos - state->incomplete;
+       offset_r = state->readpos - state->incomplete;
           
 
        uint8_t *newbuf = realloc(state->incomplete, state->incomplete_len + grow );
@@ -219,6 +220,8 @@ int main() {
     unpacked_cell_t *foobar, *b;
     cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
     packed_cell_t *dest = malloc(sizeof(packed_cell_t));
+    assert(dest != NULL);
+    assert(hdr != NULL);
 
     dest->data = malloc(7 + HDR_LEN);
     uint8_t data [] = {0x41,0x41,0x41,0x41,0x41,0x41,0x42};
