@@ -185,7 +185,7 @@ void reorder_add(unpacked_cell_t *newcell, reordering_state_t *state)
     unpacked_cell_t *tmp;
     assert(newcell != NULL);
     assert(state != NULL);
-    if (state->head != NULL)
+    if (state->head == NULL)
     {
         state->head = newcell;
         newcell->next=NULL;
