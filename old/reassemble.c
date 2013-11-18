@@ -94,8 +94,8 @@ reassembly_state_t * initialize_reass()
     assert(state != NULL);
     state->incomplete = malloc(sizeof(uint8_t) * INITIALBUFFER);
     assert(state->incomplete != NULL);
-    state->write_o= 0;
-    state->read_o= 0;
+    state->write_o = 0;
+    state->read_o = 0;
     state->incomplete_len = INITIALBUFFER;
     return state;
 }
@@ -159,7 +159,9 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
      otherwise horrible things may happen */
     assert(state->write_o > state->read_o);
     
-    endofcell = unpack_cell(state->read_o + state->incomplete, state->write_o- state->read_o, out);
+    endofcell = unpack_cell(state->read_o + state->incomplete, 
+                state->write_o - state->read_o, 
+                out);
 
     if(endofcell == NULL)
     {
@@ -170,7 +172,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
     assert (out->payload != NULL);
     memcpy(out->payload, (state->incomplete + state->read_o+ HDR_LEN), out->hdr.payload_len);
 
-    state->read_o = endofcell + 1 - state->incomplete;
+    state->read_o = endofcell - state->incomplete + 1
     return out;
 
 }
