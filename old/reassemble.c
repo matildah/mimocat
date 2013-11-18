@@ -172,7 +172,7 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
     assert (out->payload != NULL);
     memcpy(out->payload, (state->incomplete + state->read_o+ HDR_LEN), out->hdr.payload_len);
 
-    state->read_o = endofcell - state->incomplete + 1
+    state->read_o = endofcell - state->incomplete + 1;
     return out;
 
 }
