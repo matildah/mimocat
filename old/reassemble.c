@@ -62,8 +62,8 @@
 */
 
 typedef struct reassembly_state {
-    uint8_t *writepos;     /* pointer within incomplete */
-    uint8_t *readpos;      /* pointer within incomplete */            
+    size_t write_o;     /* offset within incomplete */
+    size_t read_o;      /* offset within incomplete */            
     uint8_t *incomplete;   /* the reassembly buffer */
     size_t incomplete_len; /* and its length */
 } reassembly_state_t;
@@ -94,8 +94,8 @@ reassembly_state_t * initialize_reass()
     assert(state != NULL);
     state->incomplete = malloc(sizeof(uint8_t) * INITIALBUFFER);
     assert(state->incomplete != NULL);
-    state->writepos = state->incomplete;
-    state->readpos = state->incomplete;
+    state->write_o= 0;
+    state->read_o= 0;
     state->incomplete_len = INITIALBUFFER;
     return state;
 }
@@ -105,10 +105,8 @@ reassembly_state_t * initialize_reass()
 void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 {
     size_t bytes_left; /* how many bytes are available inside the buffer */
-    assert (state->writepos >= state->incomplete);
-    assert (state->incomplete_len >= (state->writepos - state->incomplete));
 
-    bytes_left = state->incomplete_len - (state->writepos - state->incomplete);
+    bytes_left = state->incomplete_len - state->write_o;
     
     if(bytes_left <= len)
     { /* ok, we need to grow our buffer to accomodate the incoming data */
@@ -116,14 +114,6 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
        size_t grow = len; /* we can grow it by how much we want, but it needs
                                to be at least big enough to hold the new data */
 
-       size_t offset_w; 
-       size_t offset_r;
-
-       /* we need to convert the pointers to things within the buffers to 
-          offsets because realloc might change where the buffer begins */
-       offset_w = state->writepos - state->incomplete;
-       offset_r = state->readpos - state->incomplete;
-          
 
        uint8_t *newbuf = realloc(state->incomplete, state->incomplete_len + grow );
        assert (newbuf != NULL);
@@ -132,12 +122,10 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 
        state->incomplete_len += grow; /* keep track of the current buffer size */
 
-       state->writepos = state->incomplete + offset_w; 
-       state->readpos = state->incomplete + offset_r; 
     }
     
-    memcpy(state->writepos, data, len);
-    state->writepos += len;
+    memcpy(state->write_o + state->incomplete, data, len);
+    state->write_o+= len;
 
 }
 
@@ -154,24 +142,24 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
     uint8_t *endofcell;
     out = malloc(sizeof(unpacked_cell_t));
     assert (out != NULL);
-    assert (state->writepos != NULL);
-    assert (state->readpos  != NULL);
+    assert (0 <= state->write_o && state->write_o < state->incomplete_len);
+    assert (0 <= state->read_o  && state->read_o  < state->incomplete_len);
 
-    if(state->writepos == state->readpos)
+    if(state->write_o == state->read_o)
     {
         /* no bytes for us to read here, might as well reset these pointers
            back to the start of the buffer */
-        state->writepos = state->incomplete;
-        state->readpos = state->incomplete;
+        state->write_o = 0;
+        state->read_o = 0;
         free(out);
         return NULL;
     }
 
     /* where we start reading should be before where we'll end reading 
      otherwise horrible things may happen */
-    assert(state->writepos > state->readpos);
+    assert(state->write_o > state->read_o);
     
-    endofcell = unpack_cell(state->readpos, state->writepos - state->readpos, out);
+    endofcell = unpack_cell(state->read_o + state->incomplete, state->write_o- state->read_o, out);
 
     if(endofcell == NULL)
     {
@@ -180,9 +168,9 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
     }
     out->payload = malloc(out->hdr.payload_len);
     assert (out->payload != NULL);
-    memcpy(out->payload, (state->readpos + HDR_LEN), out->hdr.payload_len);
+    memcpy(out->payload, (state->incomplete + state->read_o+ HDR_LEN), out->hdr.payload_len);
 
-    state->readpos = endofcell + 1;
+    state->read_o = endofcell + 1 - state->incomplete;
     return out;
 
 }
