@@ -25,7 +25,7 @@
  */
 
 
-#define INITIALBUFFER (1024) /* initial length of the reassembly buffer. 
+#define INITIALBUFFER (1) /* initial length of the reassembly buffer. 
                                 this is totally arbitrary */
 
 /* this is the state for step one. there is one instance of this structure for
@@ -105,9 +105,12 @@ reassembly_state_t * initialize_reass()
 void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
 {
     size_t bytes_left; /* how many bytes are available inside the buffer */
+    assert (state->writepos >= state->incomplete);
+    assert (state->incomplete_len >= (state->writepos - state->incomplete));
+
     bytes_left = state->incomplete_len - (state->writepos - state->incomplete);
     
-    if(bytes_left < len)
+    if(bytes_left <= len)
     { /* ok, we need to grow our buffer to accomodate the incoming data */
        
        size_t grow = len; /* we can grow it by how much we want, but it needs
@@ -223,7 +226,7 @@ size_t reorder_pop(uint8_t *data, reordering_state_t *state)
 
 int main() {
     reassembly_state_t *state = initialize_reass();
-    unpacked_cell_t *foobar, *b;
+    unpacked_cell_t *foobar, *b, *c;
     cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
     packed_cell_t *dest = malloc(sizeof(packed_cell_t));
     reordering_state_t *reorder = malloc(sizeof(reordering_state_t));
@@ -252,7 +255,7 @@ int main() {
 
     foobar = pop_cell(state);    
     b = pop_cell(state);    
-
+    c = pop_cell(state);
 
     reorder = initialize_reorder();
     reorder_add(foobar, reorder);
