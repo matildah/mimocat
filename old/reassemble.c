@@ -159,10 +159,10 @@ unpacked_cell_t * pop_cell(reassembly_state_t *state)
      otherwise horrible things may happen */
     assert(state->write_o > state->read_o);
     
-    endofcell = unpack_cell(state->read_o + state->incomplete, 
-                state->write_o - state->read_o, 
-                out);
-
+    endofcell = unpack_cell(state->read_o + state->incomplete, /* where to start */
+                state->write_o - state->read_o,              /* how much to read */
+                out);                                       /* where to output the
+                                                               unpacked cell */
     if(endofcell == NULL)
     {
         free(out);
