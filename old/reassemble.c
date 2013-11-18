@@ -46,8 +46,14 @@
    if we ever have writepos == readpos, this means there are no data in the 
    buffer and that we are free to set both writepos and readpos to point at
    the beginning of the buffer (to prevent it from growing indefinitely big)
+    
 
-       /- incomplete
+   if bytes with valid data are shown by XXXXX, this is how the pointers 
+   are set up: 
+
+       /- incomplete                 (incomplete + incomplete_len)
+       |                                         |
+       v                                         v
        +0    +1    +2    +3    +4    +5   +6     +7
     [-----|-----|XXXXX|XXXXX|XXXXX|-----|-----|-----]
                    ^                 ^
@@ -220,6 +226,7 @@ int main() {
     unpacked_cell_t *foobar, *b;
     cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
     packed_cell_t *dest = malloc(sizeof(packed_cell_t));
+    reordering_state_t *reorder = malloc(sizeof(reordering_state_t));
     assert(dest != NULL);
     assert(hdr != NULL);
 
@@ -233,8 +240,24 @@ int main() {
 
     pack_cell(hdr, data, dest);
     push_data(dest->data, dest->data_len, state);
+    data[0] = 0x43;
+    data[1] = 0x44;
+
+    hdr->seq=0xabadbeee;
+    hdr->payload_len=2;
+    hdr->type=DATA_TYPE;
+
+    pack_cell(hdr, data, dest);
+    push_data(dest->data, dest->data_len, state);
+
     foobar = pop_cell(state);    
     b = pop_cell(state);    
+
+
+    reorder = initialize_reorder();
+    reorder_add(foobar, reorder);
+    reorder_add(b, reorder);
+
 
     free(foobar->payload);
     free(foobar);
