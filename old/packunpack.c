@@ -47,7 +47,7 @@ void pack_cell(cell_hdr_t *source, uint8_t *payload, packed_cell_t *dest)
    */
 
 
-uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
+uint8_t *unpack_cell(uint8_t *source, size_t size, unpacked_cell_t *dest)
 {
     uint32_t seq, payload_len;
     uint8_t type;
@@ -100,8 +100,8 @@ uint8_t *unpack_cell(uint8_t *source, uint32_t size, unpacked_cell_t *dest)
 }
 
 
-/*
 
+/*
 void main ()
 {
 
