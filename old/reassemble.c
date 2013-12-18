@@ -125,7 +125,7 @@ void push_data(uint8_t *data, size_t len, reassembly_state_t *state)
     }
     
     memcpy(state->write_o + state->incomplete, data, len);
-    state->write_o+= len;
+    state->write_o += len;
 
 }
 
@@ -198,28 +198,55 @@ void reorder_add(unpacked_cell_t *newcell, reordering_state_t *state)
         newcell->next=NULL;
         return;
     }
-
     
     for (tmp = state->head; tmp->next != NULL; tmp=tmp->next)
     {
     }
     
     assert(tmp != NULL);
+    assert(tmp->next == NULL);
     tmp->next = newcell;
     newcell->next=NULL;
 }
 
 
-size_t reorder_pop(uint8_t *data, reordering_state_t *state)
+/* pops the next frame (in terms of sequence number) from the reordering_state 
+   linked list. returns a pointer to the same unpacked_cell_t structure that 
+   was in the linked list, returns NULL if we can't find the next frame.
+ 
+   if we cannot find a frame to pop, we return zero */
+unpacked_cell_t * pop_next(reordering_state_t *state)
 {
+    unpacked_cell_t *tmp, *matchingframe;
+    assert(state != NULL);
+    
+    if (state->head == NULL)
+    {
+        return NULL;
+    }
+    /* the following code is broken as all hell */
+    for (tmp = state->head; tmp->next != NULL; tmp=tmp->next)
+    {
+        if (tmp->next->hdr.seq == state->last_seq)
+        {
+            matchingframe = tmp->next;
+            tmp->next = matchingframe->next;
+
+            return matchingframe;
+        }
+
+    }
+    return NULL;
+
 }
+
 
 int main() {
     reassembly_state_t *state = initialize_reass();
     unpacked_cell_t *foobar, *b, *c;
     cell_hdr_t *hdr = malloc(sizeof(cell_hdr_t));
     packed_cell_t *dest = malloc(sizeof(packed_cell_t));
-    reordering_state_t *reorder = malloc(sizeof(reordering_state_t));
+    reordering_state_t *reorder;
     assert(dest != NULL);
     assert(hdr != NULL);
 
@@ -245,12 +272,12 @@ int main() {
 
     foobar = pop_cell(state);    
     b = pop_cell(state);    
-    c = pop_cell(state);
 
     reorder = initialize_reorder();
     reorder_add(foobar, reorder);
     reorder_add(b, reorder);
 
+    c = pop_next(reorder);
 
     free(foobar->payload);
     free(foobar);
@@ -258,7 +285,10 @@ int main() {
     free(dest->data);
     free(dest);
     free(state->incomplete);
+    free(b->payload);
+    free(c);
     free(b);
+    free(reorder);
     free(state);
     return 0;
 
