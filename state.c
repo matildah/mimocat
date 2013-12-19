@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-
+#define NUMFDS 256 /* maximum number of simultanous data connections */
 
 /* this struct contains information on a chunk of data that was sent over one 
    of our data connections. this is a struct that we will pack and send over
@@ -49,12 +49,19 @@ typedef struct unpacked_chunk {
    the fd numbers are likely different */
 
 typedef struct fd_array {
-    int fds [256];          /* holds file descriptors, indexed arbitrarily */
-    uint8_t indices [256];  /* holds index numbers, indexed in parallel with the fd
-                               array */
-    uint8_t numfds;         /* number of file descriptors we have stored */
+    int numfds;                /* number of file descriptors we have stored */
+
+    int fds [NUMFDS];          /* holds file descriptors, indexed in an arbitrary 
+                                  from 0 to numfds-1 */
+    
+    uint8_t indices [NUMFDS];  /* holds index numbers, indexed in parallel with 
+                                  the fd array */
+    uint32_t bytes [NUMFDS];   /* if we are the sender, this tells us how many
+                                  bytes have been written to the socket in 
+                                  question. if we are the receiver, this is 
+                                  where we keep track of how many bytes we've 
+                                  read over this socket */
+
 } fd_array_t;
 
 
-
-int 
