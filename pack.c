@@ -68,7 +68,11 @@ int main() {
     pack_header(from, to);
 
     unpack_header(to->data, to->len, check);
-    assert(check->info.seq == from->seq);
+
+    assert(check->info.index     == from->index );
+    assert(check->info.begin_off == from->begin_off );
+    assert(check->info.end_off   == from->end_off );
+    assert(check->info.seq       == from->seq);
     
     free(from);
     free(to);
