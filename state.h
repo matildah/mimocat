@@ -33,7 +33,7 @@ typedef struct chunk_hdr {
     uint32_t begin_off;  /* what was the offset of the first byte of this chunk */
     uint32_t end_off;    /* what was the offset of the last byte we sent */
     uint32_t seq;  /* this chunk's sequence number */
-} chunk_hdr_t;
+} CHUNK_HDR;
 
 #define CHUNK_HDR_LEN (1+4+4+4)
 
@@ -41,12 +41,12 @@ typedef struct chunk_hdr {
 typedef struct packed_chunk {
     uint8_t *data;
     size_t  len;
-} packed_chunk_t;
+} PACKED_CHUNK;
 
 typedef struct unpacked_chunk {
     chunk_hdr_t info; /* chunk information header */
     struct unpacked_chunk *next; /* pointer to the next header */
-} unpacked_chunk_t;
+} UNPACKED_CHUNK;
 
 
 /* holds the association between the file descriptors for our data connections
@@ -57,7 +57,7 @@ typedef struct fd_array {
     int numfds;                /* number of file descriptors we have stored */
 
     int fds [NUMFDS];          /* holds file descriptors, indexed in an arbitrary 
-                                  from 0 to numfds-1 */
+                                  order from 0 to numfds-1 */
     
     uint8_t indices [NUMFDS];  /* holds index numbers, indexed in parallel with 
                                   the fd array */
@@ -67,6 +67,6 @@ typedef struct fd_array {
                                   where we keep track of how many bytes we've 
                                   read over this socket */
 
-} fd_array_t;
+} FD_ARRAY;
 
 

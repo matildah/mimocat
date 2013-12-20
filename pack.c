@@ -8,7 +8,7 @@
    network. this functions assumes that dest->data is an already-allocated
    buffer of memory with length exactly CHUNK_HDR_LEN
  */
-void pack_header(chunk_hdr_t *from, packed_chunk_t *dest)
+void pack_header(CHUNK_HDR *from, PACKED_CHUNK *dest)
 {
     uint32_t beginprime, endprime, seqprime;
     /* things get converted to network byte order */
@@ -25,10 +25,10 @@ void pack_header(chunk_hdr_t *from, packed_chunk_t *dest)
 }
 
 
-/* converts a blob of data that is CHUNK_HDR_LEN long into a unpacked_chunk_t
-   structure */
+/* converts a blob of data that is CHUNK_HDR_LEN long into a UNPACKED_CHUNK
+   structure (which must be allocated by our caller) */
 
-void unpack_header(uint8_t *data, size_t len, unpacked_chunk_t *dest)
+void unpack_header(uint8_t *data, size_t len, UNPACKED_CHUNK *dest)
 {
     uint32_t begin, end, seq;
     uint8_t  index;
