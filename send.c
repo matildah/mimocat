@@ -36,13 +36,9 @@ int send_chunk(FD_ARRAY *fdstate, uint8_t data, size_t len)
     
     pack_header(&ourheader, &packedchunk);
 
-    memcpy(buf, packedchunk.data, packedchunk.len);
+    memcpy(buf,                   packedchunk.data, packedchunk.len);
+    memcpy(buf + packedchunk.len, data,             len);
 
-
-    
-
-    
-       
 }
 
 
