@@ -68,9 +68,9 @@ typedef struct fd_array {
                                   where we keep track of how many bytes we've 
                                   read over this socket */
 
-    int lastidx;               /* index into arrays {fds, indices, bytes} of 
-                                  the last connection we sent data down */
-    uint32_t lastseq;          /* the last sequence number we used */
+    int nextidx;               /* index into arrays {fds, indices, bytes} of 
+                                  the next connection we sent data down */
+    uint32_t nextseq;          /* the sequence number we next use*/
 } FD_ARRAY;
 
 

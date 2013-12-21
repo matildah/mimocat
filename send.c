@@ -12,24 +12,19 @@ int send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
     size_t buflen;
     assert(fdstate -> numfds != 0);
 
-    fdstate->lastidx++;
-    if(fdstate->lastidx > fdstate->numfds - 1)
-    {
-        fdstate->lastidx = 0;
-    }
 
     buflen = len + CHUNK_HDR_LEN;
     assert(buflen > len && buflen > CHUNK_HDR_LEN);
     buf = malloc(buflen);
     assert (buf != NULL);
 
-    fd = fdstate->fds[fdstate->lastidx];
+    fd = fdstate->fds[fdstate->nextidx];
 
-    ourheader.index = fdstate->fds[fdstate->lastidx];
-    ourheader.begin_off = fdstate->bytes[fdstate->lastidx];
+    ourheader.index = fdstate->fds[fdstate->nextidx];
+    ourheader.begin_off = fdstate->bytes[fdstate->nextidx];
     ourheader.end_off = ourheader.begin_off + len;
-    ourheader.seq = fdstate->lastseq++;
 
+    ourheader.seq = fdstate->nextseq;
 
     packedchunk.data = malloc(CHUNK_HDR_LEN);
     assert(packedchunk.data != NULL);
@@ -40,6 +35,19 @@ int send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
     memcpy(buf + packedchunk.len, data,             len);
     free(packedchunk.data);
 
+    if(send_all(fd, buf, buflen, 0) == -1)
+    { 
+        perror("send error");
+        exit(-1);
+    }
+
+    fdstate->nextidx++;
+    if(fdstate->nextidx > fdstate->numfds - 1)
+    {
+        fdstate->nextidx = 0;
+    }
+
+    fdstate->nextseq++;
 }
 
 
