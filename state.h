@@ -44,7 +44,7 @@ typedef struct packed_chunk {
 } PACKED_CHUNK;
 
 typedef struct unpacked_chunk {
-    chunk_hdr_t info; /* chunk information header */
+    CHUNK_HDR info; /* chunk information header */
     struct unpacked_chunk *next; /* pointer to the next header */
 } UNPACKED_CHUNK;
 
@@ -57,7 +57,8 @@ typedef struct fd_array {
     int numfds;                /* number of file descriptors we have stored */
 
     int fds [NUMFDS];          /* holds file descriptors, indexed in an arbitrary 
-                                  order from 0 to numfds-1 */
+                                  order from 0 (inclusive) to numfds-1 (inclusive)
+                                */
     
     uint8_t indices [NUMFDS];  /* holds index numbers, indexed in parallel with 
                                   the fd array */
@@ -67,6 +68,8 @@ typedef struct fd_array {
                                   where we keep track of how many bytes we've 
                                   read over this socket */
 
+    int lastidx;               /* index into arrays {fds, indices, bytes} of 
+                                  the last connection we sent data down */
 } FD_ARRAY;
 
 
