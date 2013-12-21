@@ -3,7 +3,7 @@
 #include "state.h"
 
 /* this function sends a chunk of data down the next appropriate fd */
-int send_chunk(FD_ARRAY *fdstate, uint8_t data, size_t len)
+int send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
 {
     CHUNK_HDR ourheader;
     PACKED_CHUNK packedchunk;
