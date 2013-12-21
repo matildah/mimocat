@@ -70,6 +70,7 @@ typedef struct fd_array {
 
     int lastidx;               /* index into arrays {fds, indices, bytes} of 
                                   the last connection we sent data down */
+    uint32_t lastseq;          /* the last sequence number we used */
 } FD_ARRAY;
 
 
