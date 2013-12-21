@@ -6,6 +6,7 @@
 int send_chunk(FD_ARRAY *fdstate, uint8_t data, size_t len)
 {
     CHUNK_HDR ourheader;
+    PACKED_CHUNK packedchunk;
     int fd;
     uint8_t *buf;
     size_t buflen;
@@ -27,6 +28,16 @@ int send_chunk(FD_ARRAY *fdstate, uint8_t data, size_t len)
     ourheader.index = fdstate->fds[fdstate->lastidx];
     ourheader.begin_off = fdstate->bytes[fdstate->lastidx];
     ourheader.end_off = ourheader.begin_off + len;
+    ourheader.seq = fdstate->lastseq++;
+
+
+    packedchunk.data = malloc(CHUNK_HDR_LEN);
+    assert(packedchunk.data != NULL);
+    
+    pack_header(&ourheader, &packedchunk);
+
+    memcpy(buf, packedchunk.data, packedchunk.len);
+
 
     
 
