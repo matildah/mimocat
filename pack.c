@@ -54,9 +54,9 @@ void unpack_header(uint8_t *data, size_t len, UNPACKED_CHUNK *dest)
 
 
 int main() {  
-    chunk_hdr_t *from = malloc(sizeof(chunk_hdr_t));
-    packed_chunk_t *to= malloc(sizeof(packed_chunk_t));
-    unpacked_chunk_t *check= malloc(sizeof(unpacked_chunk_t));
+    CHUNK_HDR *from = malloc(sizeof(CHUNK_HDR));
+    PACKED_CHUNK *to= malloc(sizeof(PACKED_CHUNK));
+    UNPACKED_CHUNK *check= malloc(sizeof(UNPACKED_CHUNK));
 
     from->index     = 69;
     from->begin_off = 0xdeadbeef;
