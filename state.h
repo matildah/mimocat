@@ -55,7 +55,7 @@ typedef struct unpacked_chunk {
 
 typedef struct fd_array {
     int numfds;                /* number of file descriptors we have stored */
-
+    int controlfd;             /* fd of control connection */
     int fds [NUMFDS];          /* holds file descriptors, indexed in an arbitrary 
                                   order from 0 (inclusive) to numfds-1 (inclusive)
                                 */
