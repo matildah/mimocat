@@ -69,7 +69,7 @@ typedef struct fd_array {
                                   read over this socket */
 
     int nextidx;               /* index into arrays {fds, indices, bytes} of 
-                                  the next connection we sent data down */
+                                  the next connection we send data down */
     uint32_t nextseq;          /* the sequence number we next use*/
 } FD_ARRAY;
 
