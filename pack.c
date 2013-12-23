@@ -53,7 +53,7 @@ void unpack_header(uint8_t *data, size_t len, UNPACKED_CHUNK *dest)
 }
 
 
-int main() {  
+int pack_test() {  
     CHUNK_HDR *from = malloc(sizeof(CHUNK_HDR));
     PACKED_CHUNK *to= malloc(sizeof(PACKED_CHUNK));
     UNPACKED_CHUNK *check= malloc(sizeof(UNPACKED_CHUNK));
