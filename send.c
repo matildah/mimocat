@@ -15,7 +15,7 @@ void send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
     fd = fdstate->fds[fdstate->nextidx]; /* which FD we use */
     
     /* we prepare the chunk header */
-    ourheader.index = fdstate->fds[fdstate->nextidx];
+    ourheader.index = fdstate->indices[fdstate->nextidx];
     ourheader.begin_off = fdstate->bytes[fdstate->nextidx];
     ourheader.end_off = ourheader.begin_off + len;
     ourheader.seq = fdstate->nextseq;
