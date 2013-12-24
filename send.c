@@ -4,7 +4,7 @@
 
 /* this function sends a chunk of data down the next appropriate fd and a
    corresponding chunk header down the control connection */
-int send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
+void send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
 {
     CHUNK_HDR ourheader;
     PACKED_CHUNK packedchunk;
@@ -43,6 +43,7 @@ int send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
     }
 
     /* here we update fdstate */
+
     fdstate->bytes[fdstate->nextidx] += len; /* how many bytes we sent down that fd*/
     /* we update nextidx while making sure it doesn't get too big */
     fdstate->nextidx++;
@@ -50,9 +51,93 @@ int send_chunk(FD_ARRAY *fdstate, uint8_t *data, size_t len)
     {
         fdstate->nextidx = 0;
     }
-
-
+    /* increment the sequence number */
     fdstate->nextseq++;
 }
 
+/* creates and connects sockets for all the data connections */
+FD_ARRAY* data_sockets(HOSTS_PORTS *hp)
+{
+    FD_ARRAY *fdarray;
+    int fd, rval, i;
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+
+    fdarray = malloc(sizeof(FD_ARRAY));
+    assert(fdarray != NULL);
+    assert(hp != NULL);
+
+    fdarray->numfds = hp->numpairs;
+    fdarray->nextidx = 0;
+    fdarray->nextseq = 0;
+
+    /* let's do fun stuff with getaddrinfo now */
+
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC; /* either ipv4 or ipv6, we don't care */
+    hints.ai_socktype = SOCK_STREAM; /* TCP */
+    hints.ai_flags = 0;
+    hints.ai_protocol = 0;
+
+
+    for(i = 0; i < hp->numpairs; i++)
+    {
+        rval = getaddrinfo(hp->nodes[i], hp->ports[i], &hints, &result);
+        if (rval != 0)
+        {
+            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rval));
+            exit(1);
+        }
+        /* now we iterate over the lists of results that getaddrinfo returned
+           until we can successfully make a socket and connect with it */
+        for (rp = result; rp != NULL; rp = rp->ai_next)
+        {
+            fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+            if (fd == -1)
+            {
+                /* the socket making failed, so we need to do a different 
+                   address */
+                continue;
+            }
+
+            /* we made a socket, now we try to connect */
+            if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1)
+            {
+                break;  /* we successfully connected, let's exit this loop */
+            }
+            
+            close(fd); /* making the socket worked but connect() failed so we 
+                          close this socket */
+        }
+        if (rp == NULL) /* no address worked */
+        {
+            fprintf(stderr, "Could not connect to %s:%s\n",hp->nodes[i], hp->ports[i]);
+            exit(1);
+        }
+        freeaddrinfo(result);
+
+        /* we now have a socket open, now let's store info about it in our 
+           FD_ARRAY */
+        fdarray->fds[i] = fd;
+        fdarray->indices[i] = i;
+        fdarray->bytes[i] = 0;
+
+    }
+    return fdarray;
+}
+
+
+
+int main(int argc, char* argv[])
+{
+    HOSTS_PORTS hp;
+    FD_ARRAY *fd;
+
+    hp.nodes[0] = "127.0.0.1";
+    hp.ports[0] = "1234";
+    hp.numpairs = 1;
+    fd = data_sockets(&hp);
+
+
+}
 
