@@ -14,6 +14,11 @@
 
 #define NUMFDS 256 /* maximum number of simultanous data connections */
 
+
+
+
+
+
 /* this struct contains information on a chunk of data that was sent over one 
    of our data connections. this is a struct that we will pack and send over
    the control connection.
@@ -88,4 +93,6 @@ typedef struct hosts_ports {
                              parallel with *nodes[] */
 } HOSTS_PORTS;
 
-
+void pack_header(CHUNK_HDR *from, PACKED_CHUNK *dest);
+void unpack_header(uint8_t *data, size_t len, UNPACKED_CHUNK *dest);
+ssize_t send_all(int socket, const void *buffer, size_t length, int flag);
