@@ -248,8 +248,11 @@ int main(int argc, char* argv[])
     initial_data(fd);
     control_socket(fd, argv[1], argv[2]);
     mainloop(0, fd);
-    close(fd->fds[0]);
-    close(fd->fds[1]);
+    for (i = 0; i < fd->numfds; i++)
+    {
+        close(fd->fds[i]);
+    }
+
     close(fd->controlfd);
     return 0;
 }
