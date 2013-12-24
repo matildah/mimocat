@@ -254,6 +254,7 @@ int main(int argc, char* argv[])
     }
 
     close(fd->controlfd);
+    free(fd);
     return 0;
 }
 
