@@ -134,8 +134,10 @@ int main(int argc, char* argv[])
     FD_ARRAY *fd;
 
     hp.nodes[0] = "127.0.0.1";
+    hp.nodes[1] = "127.0.0.1";
     hp.ports[0] = "1234";
-    hp.numpairs = 1;
+    hp.ports[1] = "5678";
+    hp.numpairs = 2;
     fd = data_sockets(&hp);
 
 
