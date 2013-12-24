@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 
 #define NUMFDS 256 /* maximum number of simultanous data connections */
 
@@ -54,8 +58,9 @@ typedef struct unpacked_chunk {
    the fd numbers are likely different */
 
 typedef struct fd_array {
-    int numfds;                /* number of file descriptors we have stored */
     int controlfd;             /* fd of control connection */
+    int numfds;                /* number of file descriptors we have stored, 
+                                  not including the control connection*/
     int fds [NUMFDS];          /* holds file descriptors, indexed in an arbitrary 
                                   order from 0 (inclusive) to numfds-1 (inclusive)
                                 */
@@ -72,5 +77,15 @@ typedef struct fd_array {
                                   the next connection we send data down */
     uint32_t nextseq;          /* the sequence number we next use*/
 } FD_ARRAY;
+
+typedef struct hosts_ports {
+    int numpairs; /* number of (node, port) pairs we have (must be less than 
+                     NUMFDS */
+    char * nodes[NUMFDS]; /* array of pointers to NUL-terminated strings 
+                             representing hostnames */
+    char * ports[NUMFDS]; /* array of pointers to NUL-terminated strings 
+                             representing ports, this is indexed in 
+                             parallel with *nodes[] */
+} HOSTS_PORTS;
 
 
