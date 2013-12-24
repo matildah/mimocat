@@ -198,6 +198,30 @@ void initial_data(FD_ARRAY *fd)
 }
 
 
+/* loops, copying data from the fdfrom file descriptor and calls send_chunk
+   on each chunk of data */
+void mainloop(int fdfrom, FD_ARRAY *fd)
+{
+    ssize_t read_bytes;
+    uint8_t buf [10];
+
+    while (1)
+    {
+        read_bytes = read(fdfrom, &buf, 10);
+        if (read_bytes == -1)
+        {
+            perror("read error");
+        }
+        
+        if (read_bytes == 0)
+        {
+            break;
+        }
+        send_chunk(fd, buf, read_bytes);
+    }
+}
+
+
 
 int main(int argc, char* argv[])
 {
@@ -211,8 +235,12 @@ int main(int argc, char* argv[])
     hp.numpairs = 2;
     fd = data_sockets(&hp);
     initial_data(fd);
+    control_socket(fd, "127.0.0.1", "9000");
+    mainloop(0, fd);
     close(fd->fds[0]);
     close(fd->fds[1]);
+    close(fd->controlfd);
+
 
     return 0;
 }
