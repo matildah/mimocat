@@ -127,6 +127,21 @@ FD_ARRAY* data_sockets(HOSTS_PORTS *hp)
 }
 
 
+/* sends the index of each data connection down the corresponding data 
+   connection so our peer can match against the indices we send over the
+   control channel */
+
+void initial_data(FD_ARRAY *fd)
+{
+    assert (fd != NULL);
+    int i;
+    for (i = 0; i < fd->numfds; i++)
+    {
+        send_all(fd->fds[i], &fd->indices[i], 1, 0);
+    }
+}
+
+
 
 int main(int argc, char* argv[])
 {
@@ -139,7 +154,10 @@ int main(int argc, char* argv[])
     hp.ports[1] = "5678";
     hp.numpairs = 2;
     fd = data_sockets(&hp);
+    initial_data(fd);
+    close(fd->fds[0]);
+    close(fd->fds[1]);
 
-
+    return 0;
 }
 
