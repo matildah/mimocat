@@ -227,21 +227,30 @@ int main(int argc, char* argv[])
 {
     HOSTS_PORTS hp;
     FD_ARRAY *fd;
+    int i;
+    if (argc < 5)
+    {
+        printf("usage: %s controlhost controlport datahost_1 dataport_1 [datahost_2 dataport_2 ...]\n", argv[0]);
+        exit(10);
+    }
 
-    hp.nodes[0] = "127.0.0.1";
-    hp.nodes[1] = "127.0.0.1";
-    hp.ports[0] = "1234";
-    hp.ports[1] = "5678";
-    hp.numpairs = 2;
+
+    hp.numpairs = 0;
+    for (i = 0; 2*i + 4 < argc ;i++)
+    {
+        hp.nodes[i] = argv[2*i+3];
+        hp.ports[i] = argv[2*i+4];
+        hp.numpairs++;
+    }
+
+
     fd = data_sockets(&hp);
     initial_data(fd);
-    control_socket(fd, "127.0.0.1", "9000");
+    control_socket(fd, argv[1], argv[2]);
     mainloop(0, fd);
     close(fd->fds[0]);
     close(fd->fds[1]);
     close(fd->controlfd);
-
-
     return 0;
 }
 
