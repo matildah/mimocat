@@ -12,8 +12,8 @@
 #include <netdb.h>
 #include <unistd.h>
 
-#define NUMFDS 256 /* maximum number of simultanous data connections */
-
+#define NUMFDS (256) /* maximum number of simultanous data connections */
+#define BLOCKSIZE (1024) /* size of the blocks we read in / write out */
 
 
 

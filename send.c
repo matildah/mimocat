@@ -203,11 +203,11 @@ void initial_data(FD_ARRAY *fd)
 void mainloop(int fdfrom, FD_ARRAY *fd)
 {
     ssize_t read_bytes;
-    uint8_t buf [10];
+    uint8_t buf [BLOCKSIZE];
 
     while (1)
     {
-        read_bytes = read(fdfrom, &buf, 10);
+        read_bytes = read(fdfrom, &buf, BLOCKSIZE);
         if (read_bytes == -1)
         {
             perror("read error");
