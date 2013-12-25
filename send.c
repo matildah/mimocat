@@ -193,7 +193,11 @@ void initial_data(FD_ARRAY *fd)
     int i;
     for (i = 0; i < fd->numfds; i++)
     {
-        send_all(fd->fds[i], &fd->indices[i], 1, 0);
+        if(send_all(fd->fds[i], &fd->indices[i], 1, 0) == -1)
+        {
+            perror("send_all");
+            exit(-1);
+        }
     }
 }
 
