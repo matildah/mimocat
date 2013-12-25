@@ -24,4 +24,24 @@ ssize_t send_all(int socket, const void *buffer, size_t length, int flag)
     return bytes_sent;
 }
 
+ssize_t recv_all(int socket, void *buffer, size_t length, int flag)
+{
+    size_t bytes_recv = 0;
+    size_t bytes_unrecv = length;
+
+    int recv_r;
+
+    while (bytes_recv < length)
+    {
+        recv_r = recv(socket, buffer + bytes_recv, bytes_unrecv, flag);
+        if (recv_r == -1) 
+            return -1;
+        bytes_recv += recv_r;
+        bytes_recv -= recv_r;
+    }
+    
+    return bytes_recv;
+}
+
+
 
