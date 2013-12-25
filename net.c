@@ -24,24 +24,27 @@ ssize_t send_all(int socket, const void *buffer, size_t length, int flag)
     return bytes_sent;
 }
 
+/* just runs recv(2) in a loop until an error happens or our peer shuts down 
+   the connection */
+
 ssize_t recv_all(int socket, void *buffer, size_t length, int flag)
 {
-    size_t bytes_recv = 0;
-    size_t bytes_unrecv = length;
+    size_t bytes_received = 0;
+    size_t bytes_unreceived = length;
 
-    int recv_r;
+    int received;
 
-    while (bytes_recv < length)
+    while (bytes_received < length)
     {
-        recv_r = recv(socket, buffer + bytes_recv, bytes_unrecv, flag);
-        if (recv_r == -1) 
+        received = recv(socket, buffer + bytes_received, bytes_unreceived, flag);
+        if (received == -1) 
             return -1;
-        bytes_recv += recv_r;
-        bytes_recv -= recv_r;
+        if (received == 0) 
+            return 0;
+        bytes_received += received;
+        bytes_unreceived -= received;
     }
     
-    return bytes_recv;
+    return bytes_received;
 }
-
-
 
