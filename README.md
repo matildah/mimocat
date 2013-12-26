@@ -1,7 +1,7 @@
 mimocat
 =======
 
-netcat that splits a its stdin/stdout into two (or more) TCP streams and recombines them
+netcat that splits its stdin/stdout into two (or more) TCP streams and recombines them
 
 written by Matilda, licensed under the ISC license.
 
