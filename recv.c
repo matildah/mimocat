@@ -223,11 +223,16 @@ void main_loop(int fdout, FD_ARRAY *fd)
 
         status = recv_all(datafd, buf, chunksize, 0);
 
-        if (status == -1 )
+        if (status == -1)
         {
             perror("error in recv'ing over data connection");
             exit(-2);
         }
+        if (status == 0)
+        {
+            return;
+        }
+
         status = write_all(fdout, buf, chunksize);
         
         if(status != chunksize)
