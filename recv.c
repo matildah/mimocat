@@ -1,3 +1,4 @@
+/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
 /* this file is where we have the functions that handle receiving */
 
 #include "state.h"

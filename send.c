@@ -1,3 +1,5 @@
+/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
+
 /* the functions in this file handle the whole "sending data out" thing */
 
 #include "state.h"

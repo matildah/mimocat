@@ -1,3 +1,4 @@
+/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
 /* functions that handle conversion between our structures and data on the
    network */
 

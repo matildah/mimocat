@@ -1,3 +1,4 @@
+/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
 /* this file contains functions that make dealing with the network a bit
    easier */
 #include "state.h"

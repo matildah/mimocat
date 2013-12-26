@@ -1,3 +1,5 @@
+/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
+
 /* this is mimocat, implemented with a control TCP connection for transferring
    state
  */
