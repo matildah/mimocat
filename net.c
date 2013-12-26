@@ -48,3 +48,24 @@ ssize_t recv_all(int socket, void *buffer, size_t length, int flag)
     return bytes_received;
 }
 
+
+
+
+ssize_t write_all(int fd, const void *buffer, size_t count)
+{
+    size_t bytes_sent = 0;
+    size_t bytes_unsent = count;
+
+    int sent;
+
+    while (bytes_sent < count)
+    {
+        sent = write(fd, buffer + bytes_sent, bytes_unsent);
+        if (sent == -1) 
+            return -1;
+        bytes_sent += sent;
+        bytes_unsent -= sent;
+    }
+    
+    return bytes_sent;
+}
