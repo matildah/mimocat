@@ -1,30 +1,7 @@
 /* this file is where we have the functions that handle receiving */
 
 #include "state.h"
-FD_ARRAY * data_listeners(HOSTS_PORTS *hp);
 
-int main(int argc, char *argv[])
-{
-    HOSTS_PORTS hp;
-    FD_ARRAY *fd;
-    int i;
-
-    if(argc < 3)
-    {
-        printf("usage: %s controlport dataport_1 [dataport_2] [dataport_3] ... [dataport_n]\n",argv[0]);
-        exit(-1);
-    }
-    hp.numpairs = 0;
-
-    for(i = 0 ; i+2 < argc ; i++)
-    {
-        hp.ports[i] = argv[i+2];
-        hp.numpairs++;
-    }
-    assert(hp.numpairs <= NUMFDS);
-    fd = data_listeners(&hp);
-    control_listener(fd, argv[1]);
-}
 
 /* creates a bunch of listening sockets for the data connections */
 FD_ARRAY* data_listeners(HOSTS_PORTS *hp)
@@ -174,5 +151,85 @@ void control_listener(FD_ARRAY *fdarray, char *port)
 }
 
 
+/* this is the part where we loop over receiving stuff over the control
+   connection, and then read from the appropriate data connection */
 
 
+void main_loop(int fdout, FD_ARRAY *fd)
+{
+    ssize_t status;
+    int i, index, datafd;
+    uint8_t * buf;
+    uint32_t chunksize;
+    PACKED_CHUNK packed;
+    UNPACKED_CHUNK unpacked_hdr;
+
+    while (1)
+    {
+        status = recv_all(fd->controlfd, packed.data, CHUNK_HDR_LEN, 0);
+        if (status != CHUNK_HDR_LEN)
+        {
+            perror("error in recv'ing over control connection");
+            exit (-1);
+        }
+
+        unpack_header(packed.data, CHUNK_HDR_LEN, &unpacked_hdr);
+
+
+        for (i = 0; i < fd->numfds; i++)
+        {
+            if (fd->indices[i] == unpacked_hdr.info.index)
+            {
+                datafd = fd->fds[i];
+                break;
+            }
+        }
+        chunksize = unpacked_hdr.info.end_off - unpacked_hdr.info.begin_off + 1;
+        buf = malloc(chunksize);
+        assert(buf != NULL);
+
+        status = recv_all(datafd, buf, chunksize, 0);
+
+        if (status != chunksize)
+        {
+            perror("error in recv'ing over data connection");
+            exit(-2);
+        }
+        status = write_all(fdout, buf, chunksize);
+        
+        if(status != chunksize)
+        {
+            perror("error in sending on output");
+            exit(-3);
+        }
+        free(buf); 
+
+
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    HOSTS_PORTS hp;
+    FD_ARRAY *fd;
+    int i;
+
+    if(argc < 3)
+    {
+        printf("usage: %s controlport dataport_1 [dataport_2] [dataport_3] ... [dataport_n]\n",argv[0]);
+        exit(-1);
+    }
+    hp.numpairs = 0;
+
+    for(i = 0 ; i+2 < argc ; i++)
+    {
+        hp.ports[i] = argv[i+2];
+        hp.numpairs++;
+    }
+    assert(hp.numpairs <= NUMFDS);
+    fd = data_listeners(&hp);
+    control_listener(fd, argv[1]);
+    r_initial_data(fd);
+
+    main_loop(1, fd);
+}
