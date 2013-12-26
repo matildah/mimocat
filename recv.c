@@ -99,7 +99,6 @@ void control_listener(FD_ARRAY *fdarray, char *port)
     struct addrinfo hints;
     struct addrinfo *result, *rp;
 
-    fdarray = malloc(sizeof(FD_ARRAY));
     assert(fdarray != NULL);
 
     /* let's do fun stuff with getaddrinfo now */
@@ -151,9 +150,37 @@ void control_listener(FD_ARRAY *fdarray, char *port)
 }
 
 
+/* run accept() on our fds */
+
+void accept_all(FD_ARRAY *fd)
+{
+    int status, i;
+    status = accept(fd->controlfd, NULL, NULL);
+    if(status == -1)
+    {
+        perror("accept error on control connection");
+        exit (-1);
+    }
+    close(fd->controlfd);
+    fd->controlfd = status;
+
+
+    for(i = 0; i < fd->numfds; i++)
+    {
+        status = accept(fd->fds[i], NULL, NULL);
+        if(status == -1)
+        {
+            perror("accept error on data connection");
+            exit (-1);
+        }
+        close(fd->fds[i]);
+        fd->fds[i] = status;
+    }
+}
+
+
 /* this is the part where we loop over receiving stuff over the control
    connection, and then read from the appropriate data connection */
-
 
 void main_loop(int fdout, FD_ARRAY *fd)
 {
@@ -229,6 +256,7 @@ int main(int argc, char *argv[])
     assert(hp.numpairs <= NUMFDS);
     fd = data_listeners(&hp);
     control_listener(fd, argv[1]);
+    accept_all(fd);
     r_initial_data(fd);
 
     main_loop(1, fd);
