@@ -247,6 +247,7 @@ int main(int argc, char* argv[])
         hp.numpairs++;
     }
 
+    assert(hp.numpairs <= NUMFDS);
 
     fd = data_sockets(&hp);
     initial_data(fd);
