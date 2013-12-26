@@ -187,20 +187,25 @@ void main_loop(int fdout, FD_ARRAY *fd)
     ssize_t status;
     int i, index, datafd;
     uint8_t * buf;
+    uint8_t * hdrbuf;
     uint32_t chunksize;
-    PACKED_CHUNK packed;
     UNPACKED_CHUNK unpacked_hdr;
+    hdrbuf = malloc(CHUNK_HDR_LEN);
 
     while (1)
     {
-        status = recv_all(fd->controlfd, packed.data, CHUNK_HDR_LEN, 0);
-        if (status != CHUNK_HDR_LEN)
+        status = recv_all(fd->controlfd, hdrbuf, CHUNK_HDR_LEN, 0);
+        if (status == -1)
         {
             perror("error in recv'ing over control connection");
             exit (-1);
         }
+        if (status == 0)
+        {
+            return;
+        }
 
-        unpack_header(packed.data, CHUNK_HDR_LEN, &unpacked_hdr);
+        unpack_header(hdrbuf, CHUNK_HDR_LEN, &unpacked_hdr);
 
 
         for (i = 0; i < fd->numfds; i++)
@@ -211,13 +216,13 @@ void main_loop(int fdout, FD_ARRAY *fd)
                 break;
             }
         }
-        chunksize = unpacked_hdr.info.end_off - unpacked_hdr.info.begin_off + 1;
+        chunksize = unpacked_hdr.info.end_off - unpacked_hdr.info.begin_off;
         buf = malloc(chunksize);
         assert(buf != NULL);
 
         status = recv_all(datafd, buf, chunksize, 0);
 
-        if (status != chunksize)
+        if (status == -1 )
         {
             perror("error in recv'ing over data connection");
             exit(-2);
@@ -260,4 +265,12 @@ int main(int argc, char *argv[])
     r_initial_data(fd);
 
     main_loop(1, fd);
+    for (i = 0; i < fd->numfds; i++)
+    {
+            close(fd->fds[i]);
+    }
+
+    close(fd->controlfd);
+    free(fd);
+
 }
