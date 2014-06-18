@@ -97,4 +97,7 @@ typedef struct hosts_ports {
 
 void pack_header(CHUNK_HDR *from, PACKED_CHUNK *dest);
 void unpack_header(uint8_t *data, size_t len, UNPACKED_CHUNK *dest);
-ssize_t send_all(int socket, const void *buffer, size_t length, int flag);
+ssize_t send_all(int socket, const uint8_t *buffer, size_t length, int flag);
+ssize_t recv_all(int socket, uint8_t *buffer, size_t length, int flag);
+ssize_t write_all(int fd, const uint8_t *buffer, size_t count);
+
