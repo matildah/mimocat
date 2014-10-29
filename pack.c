@@ -1,4 +1,4 @@
-/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
+/* copyright (c) 2013 Kia <> */
 /* functions that handle conversion between our structures and data on the
    network */
 

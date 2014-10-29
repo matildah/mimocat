@@ -1,4 +1,4 @@
-/* copyright (c) 2013 Matilda Helou <hypernymy@gmail.com> */
+/* copyright (c) 2013 Kia <> */
 
 /* this is mimocat, implemented with a control TCP connection for transferring
    state
